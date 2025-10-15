@@ -1,0 +1,286 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  FREELANCE
+}
+
+enum PostStatus {
+  PENDING
+  POSTING
+  SUCCESS
+  FAILED
+  MONITORING
+}
+
+enum ResponseStatus {
+  PENDING
+  SENT
+  FAILED
+  NO_RESPONSE_NEEDED
+}
+
+enum CandidateEligibility {
+  PENDING
+  MOST_ELIGIBLE
+  ELIGIBLE
+  NOT_ELIGIBLE
+  SHORTLISTED
+}
+
+model User{
+  id          String    @id      @default(cuid())
+  username    String  
+  email       String  @unique
+  password    String  
+  createdAt   DateTime  @default(now())
+  upddatedAt  DateTime @updatedAt
+
+  //relations
+  jobs    Job[]
+  credentials   FacebookCredentials?
+
+  @@map("users")
+}
+
+model FacebookCookies {
+  id          String    @id @default(cuid())
+  email       String    @unique  // Facebook email
+  cookies     Json      // Encrypted cookie data
+  isValid     Boolean   @default(true)
+  lastUsed    DateTime  @default(now())
+  expiresAt   DateTime? // When cookies expire
+  
+  // Metadata
+  userAgent   String?   // User agent used when cookies were captured
+  ipAddress   String?   // IP when cookies were captured (optional)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("facebook_cookies")
+}
+
+model FacebookCredentials{
+  id          String    @id      @default(cuid())
+  email        String
+  password     String
+
+  createdAt   DateTime  @default(now())
+  upddatedAt  DateTime @updatedAt
+
+  //fk
+  userId       String   @unique
+  //relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("facebook_credentials")
+}
+
+model Job{
+  id          String    @id      @default(cuid())
+  title       String
+  company     String
+  location    String
+  jobType     JobType
+  experiance  String?
+  salaryRange String?
+  description String
+  requirements    String[]
+  responsibities  String[]
+  perks           String?
+  isActive     Boolean    @default(true)
+  //Facebook groups field to store user-provided group URLs
+  facebookGroups  String[] @default([])
+
+  createdAt   DateTime  @default(now())
+  upddatedAt  DateTime @updatedAt
+
+  //fk
+  userId    String
+  //relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  posts   JobPost[]
+
+  @@map("jobs")
+}
+
+model JobPost{
+  id          String    @id      @default(cuid())
+  facebookGroupUrl  String
+  postUrl   String?
+  status    PostStatus
+  //Added error message field for better debugging
+  errorMessage String?
+  //Added attempt number for retry logic
+  attemptNumber Int @default(1)
+
+  createdAt   DateTime  @default(now())
+  updatedAt DateTime @updatedAt
+
+  //fk
+  jobId       String
+  //relations
+  job         Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  comments    PostComment[]
+  metrics     PostMetrics?
+
+  @@map("job_posts")
+}
+
+// Add these new models and update existing ones
+
+model PostComment{
+  id          String    @id      @default(cuid())
+  commentId   String
+  authorName  String?
+  authorId    String?
+  content     String
+  isInterested  Boolean   @default(false)
+  responseStatus  ResponseStatus  @default(PENDING)
+  messengerLink   String?
+  
+  // Add these new fields for conversation tracking
+  messengerThreadId String? // Facebook Messenger thread ID
+  conversationStarted Boolean @default(false)
+  lastInteractionAt DateTime?
+  contextData Json? // Store the job context sent in messenger link
+  
+  createdAt   DateTime  @default(now())
+  upddatedAt  DateTime @updatedAt
+
+  //fk
+  postId      String
+  //relations
+  post         JobPost       @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("post_comments")
+}
+
+model Candidate{
+  id        Int      @id @default(autoincrement())
+  name            String
+  senderId        String
+  email           String?
+  phone           String?
+  experience      String?
+  skills          String[]
+  
+  // Enhanced resume handling
+  resumeUrl       String?
+  resumeFileName  String?
+  resumeUploadedAt DateTime?
+  
+  eligibility     CandidateEligibility @default(PENDING)
+  notes           String?
+  
+  // Enhanced conversation tracking
+  messengerConversation Json?          // Store full conversation history
+  conversationSummary   String?        // AI-generated summary
+  screeningScore        Int?           // 0-100 score
+  keyStrengths         String[]        // Identified strengths
+  concerns             String[]        // Red flags or concerns
+  
+  // Interview scheduling
+  availableForInterview Boolean @default(false)
+  preferredInterviewTime String?
+  
+  createdAt   DateTime  @default(now())
+  upddatedAt  DateTime  @updatedAt
+  
+  @@map("candidates")
+}
+
+// Add a new model for conversation messages
+model ConversationMessage {
+  id          String    @id @default(cuid())
+  threadId    String    // Messenger thread ID
+  messageId   String    // Facebook message ID
+  sender      String    // 'user' or 'bot'
+  content     String
+  messageType String    @default("text") // 'text', 'image', 'file', 'quick_reply'
+  timestamp   DateTime
+  
+  // For file attachments (like resumes)
+  attachmentUrl String?
+  attachmentType String? // 'resume', 'image', 'document'
+  
+  createdAt   DateTime  @default(now())
+  
+  @@map("conversation_messages")
+}
+model PostMetrics{
+  id              String   @id @default(cuid())
+  totalComments   Int      @default(0)
+  interestedCount Int      @default(0)
+  respondedCount  Int      @default(0)
+  eligibleCount   Int      @default(0)
+  views           Int      @default(0)
+  reactions       Int      @default(0)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  //fk
+  postId          String    @unique
+  //relations
+  post            JobPost  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@map("post_metrics")
+}
+
+// Add this model to your existing schema
+model JobContextSession {
+  id        Int      @id @default(autoincrement())
+  
+  sessionToken      String   @unique // The session ID from messenger ref
+  
+  // Job context data
+  jobPostId         String?
+  contextData       Json     // Store the full decoded context as JSON
+  
+  // Facebook integration
+  facebookUserId        String?
+  conversationStarted   Boolean @default(false)
+  
+  // Session management
+  isActive          Boolean  @default(true)
+  lastAccessedAt    DateTime @default(now())
+  expiresAt         DateTime @default(dbgenerated("now() + interval '24 hours'"))
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Indexes for better performance
+  @@index([sessionToken])
+  @@index([facebookUserId])
+  @@index([isActive, expiresAt])
+  @@map("job_context_sessions")
+}
+
+
+model ConversationStore {
+  id        Int      @id @default(autoincrement())
+  senderId  String @map("sender_id")
+  content   String @db.Text
+  
+  @@map("conversation_store")
+}

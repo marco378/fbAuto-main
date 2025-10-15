@@ -1,0 +1,92 @@
+[
+  {
+    "name": "datr",
+    "value": "whauaNid3ZcEd5h5Mk16n2T4",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1790799551.094631,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "sb",
+    "value": "whauaIwwNKW17GKkRNyMaUBX",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1790799603.622678,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "c_user",
+    "value": "61577320629722",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1790142760.269176,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "dpr",
+    "value": "1.0000000149011612",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1759211593,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "ps_l",
+    "value": "1",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1791963486.951927,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "ps_n",
+    "value": "1",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1791963486.952045,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "wd",
+    "value": "1366x768",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1759211593,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "xs",
+    "value": "8%3AhYVGPw8xjSpH9w%3A2%3A1756239604%3A-1%3A-1%3A%3AAcXDe6pGED3xJfX1R4RCLNUL3nkGPrgK8Zf54eMpC28",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1790142760.269375,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "fr",
+    "value": "1ol4BaFmW9zRpPSiN.AWe-Q3Z8W5gMydPXQ6ORxTxEkvD4YPW_H2jp9uBubjbLe_c_Y2E.Bo0jWr..AAA.0.0.Bo0jXH.AWeuDPP2xR98QdM_okD7DiKdJoU",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1766382788.234076,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  }
+]
