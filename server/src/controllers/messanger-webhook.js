@@ -1,4 +1,4 @@
-const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://prudvi.app.n8n.cloud/webhook-test/webhook-test';
+const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://fbauto-main-production.up.railway.app';
 const VERIFY_TOKEN = process.env.FACEBOOK_VERIFY_TOKEN || 'EAAUNrA8WQrUBPc75RtQwhCQiZAgmG8yHhmJdT6CVluVcS7JK2BVnntUFtyAq9DUYMx2ScZCl4FVYr2PxbVfZAvM4TZBlJPo49YNmrPKI9SVjSCFk28Wsdzp0ZCry5BPuOxuV4EPYOuZCrvmz9V99NkqbEXhPWZBDhGDbfMVPGAUNuHkWMgbP7d52gxj1RVEZCcyBMxjX2gZDZD'
 
 export const handleMessengerWebhook = async (req, res) => {
