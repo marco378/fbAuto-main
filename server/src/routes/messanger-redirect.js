@@ -34,8 +34,8 @@ export const messengerRedirectWithContext = async (req, res) => {
     // Check if the job post still exists and the parent job is active
     const jobPost = await prisma.jobPost.findFirst({
       where: {
-        id: jobPostId,
-        status: 'SUCCESS'
+        id: jobPostId
+        // status: { in: ['SUCCESS', 'PENDING', 'POSTING'] } // Optionally allow multiple statuses
       },
       include: {
         job: {
