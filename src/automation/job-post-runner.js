@@ -150,7 +150,7 @@ async function generateMessengerLink(jobData, jobPostId) {
       timestamp: Date.now(),
     };
 
-    const DOMAIN_URL = "https://fbauto-1057827887625.europe-west1.run.app";
+    const DOMAIN_URL = "https://fbauto-main-production.up.railway.app";
     const encodedContext = Buffer.from(JSON.stringify(contextData)).toString("base64url");
     const contextualMessengerLink = `${DOMAIN_URL}/api/messenger-redirect?context=${encodedContext}`;
 
@@ -232,7 +232,7 @@ async function generateSelfReplyMessage(jobData, jobPostId) {
       timestamp: Date.now(),
     };
 
-    const DOMAIN_URL = "https://fbauto-1057827887625.europe-west1.run.app";
+    const DOMAIN_URL = "https://fbauto-main-production.up.railway.app";
     const encodedContext = Buffer.from(JSON.stringify(contextData)).toString("base64url");
     const contextualMessengerLink = `${DOMAIN_URL}/api/messenger-redirect?context=${encodedContext}`;
 
@@ -853,12 +853,16 @@ export async function runJobPostAutomation(credentials, jobData = null) {
     console.error("❌ Enhanced automation error:", error.message);
     throw error;
   } finally {
-    // Optional: Keep browser open for inspection in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log("🔍 Keeping browser open for inspection (30 seconds)...");
-      await humanPause(30000);
+    // Always cleanup browser and context
+    if (page) {
+      await page.close().catch(err => console.error('Error closing page:', err));
     }
-    console.log("🧹 To cleanup manually, call cleanupJobPostAutomation()");
+    if (context) {
+      await context.close().catch(err => console.error('Error closing context:', err));
+    }
+    if (browser) {
+      await browser.close().catch(err => console.error('Error closing browser:', err));
+    }
   }
 }
 

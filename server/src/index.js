@@ -114,7 +114,7 @@ app.post("/api/automation/job-post/:userId", async (req, res) => {
 
 app.use("/api", router)
 app.use("/api", contextRouter)
-app.get('/api/messenger-redirect', messengerRedirectWithContext);
+app.get('/messenger-redirect', messengerRedirectWithContext);
 
 // Facebook Messenger webhook
 app.get('/webhook/messenger', handleMessengerWebhook);  // For verification
