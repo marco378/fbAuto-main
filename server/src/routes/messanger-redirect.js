@@ -38,8 +38,7 @@ export const messengerRedirectWithContext = async (req, res) => {
             id: true,
             title: true,
             company: true,
-            isActive: true,
-            expiresAt: true
+            isActive: true
           }
         }
       }
