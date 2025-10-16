@@ -6,14 +6,11 @@ import { prisma } from "../lib/prisma.js";
 export const messengerRedirectWithContext = async (req, res) => {
   try {
     const { context } = req.query;
-    
     console.log('🔗 Messenger redirect triggered with context');
-    
     if (!context) {
       console.log('❌ No context provided, redirecting to messenger anyway');
       return res.redirect(MESSENGER_LINK);
     }
-    
     // Decode and validate context
     let decodedContext;
     try {
@@ -23,15 +20,13 @@ export const messengerRedirectWithContext = async (req, res) => {
       console.log('❌ Failed to decode context:', e.message);
       return res.redirect(MESSENGER_LINK);
     }
-
     const { jobPostId } = decodedContext;
-
     if (!jobPostId) {
       console.log('❌ No job post ID in context');
       return res.redirect(MESSENGER_LINK);
     }
-
     // Check if the job post still exists and the parent job is active
+    console.log('🔎 Looking up jobPostId:', jobPostId);
     const jobPost = await prisma.jobPost.findFirst({
       where: {
         id: jobPostId
@@ -49,11 +44,13 @@ export const messengerRedirectWithContext = async (req, res) => {
         }
       }
     });
-
+    console.log('🔎 jobPost from DB:', JSON.stringify(jobPost, null, 2));
+    if (jobPost && jobPost.job) {
+      console.log('🔎 job from DB:', JSON.stringify(jobPost.job, null, 2));
+    }
     // If job post doesn't exist or parent job is inactive/deleted
     if (!jobPost || !jobPost.job || !jobPost.job.isActive) {
       console.log(`Job closed or deleted - JobPost ID: ${jobPostId}`);
-      
       // Return simple HTML page directly
       return res.send(`
         <!DOCTYPE html>
