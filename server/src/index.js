@@ -24,7 +24,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",             // local dev
-  "https://fbauto-main-production.up.railway.app"  // deployed backend
+   // deployed backend
     ],
     credentials: true, // IMPORTANT: allow cookies
   })
@@ -128,13 +128,13 @@ async function startServer() {
     await automationService.initialize();
     
     // Start the server
-    server = app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-      console.log(`Health check: http://localhost:${PORT}/health`);
-      console.log(`Automation status: http://localhost:${PORT}/api/automation/status`);
-      console.log('Job posting with immediate engagement runs every 2 hours');
-      console.log('Manual comment monitoring available via API when needed');
-      console.log('Resource usage optimized - ~60% reduction in browser instances');
+      server = app.listen(PORT, "0.0.0.0", () => {
+        console.log(`Server running on port ${PORT}`);
+        console.log(`Health check: http://localhost:${PORT}/health`);
+        console.log(`Automation status: http://localhost:${PORT}/api/automation/status`);
+        console.log('Job posting with immediate engagement runs every 2 hours');
+        console.log('Manual comment monitoring available via API when needed');
+        console.log('Resource usage optimized - ~60% reduction in browser instances');
     });
     
     // Handle server errors
