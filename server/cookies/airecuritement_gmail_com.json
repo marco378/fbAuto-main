@@ -24,7 +24,7 @@
     "value": "1366x768",
     "domain": ".facebook.com",
     "path": "/",
-    "expires": 1761216990,
+    "expires": 1761220562,
     "httpOnly": false,
     "secure": true,
     "sameSite": "Lax"
@@ -34,7 +34,7 @@
     "value": "61577320629722",
     "domain": ".facebook.com",
     "path": "/",
-    "expires": 1792147268.891026,
+    "expires": 1792151762.672114,
     "httpOnly": false,
     "secure": true,
     "sameSite": "None"
@@ -50,28 +50,48 @@
     "sameSite": "None"
   },
   {
-    "name": "xs",
-    "value": "8%3AU9GiKQ3U-Z0_Xg%3A2%3A1760599563%3A-1%3A-1%3A%3AAcVSogt6tEoItIXkBtUW13qsPAtZS0Xrxb5yIyeruA",
+    "name": "ps_l",
+    "value": "1",
     "domain": ".facebook.com",
     "path": "/",
-    "expires": 1792147268.891057,
+    "expires": 1795175757.802935,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "ps_n",
+    "value": "1",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1795175757.80299,
     "httpOnly": true,
     "secure": true,
     "sameSite": "None"
   },
   {
     "name": "fr",
-    "value": "1clMRlrUE8etVWzXL.AWc2QrBBMY1uiI9QDidDI9FSG6WdqUZh3r5_ZIa7MZM3raAuWBc.Bo8MvE..AAA.0.0.Bo8M9a.AWeJtIKR14Af1YIiefn--cing0c",
+    "value": "1W32zZC1VPI9kbDtk.AWemHylDKOZuy2-Oxn38xEYGCAhEwxE7I8JfKlzyLdl3euQKVUY.Bo8N1S..AAA.0.0.Bo8N1S.AWfHjvC0wo8VpJzvtVA0nQv09uY",
     "domain": ".facebook.com",
     "path": "/",
-    "expires": 1768388186.900159,
+    "expires": 1768391762.672145,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "xs",
+    "value": "8%3AU9GiKQ3U-Z0_Xg%3A2%3A1760599563%3A-1%3A-1%3A%3AAcWdJnzXXAiH3maHJScZ4pLzuqP_iI64ahVcr5m1Xg",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1792151762.672158,
     "httpOnly": true,
     "secure": true,
     "sameSite": "None"
   },
   {
     "name": "presence",
-    "value": "C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1760612190692%2C%22v%22%3A1%7D",
+    "value": "C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1760615762953%2C%22v%22%3A1%7D",
     "domain": ".facebook.com",
     "path": "/",
     "expires": -1,

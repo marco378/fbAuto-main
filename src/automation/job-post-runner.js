@@ -151,8 +151,8 @@ async function generateMessengerLink(jobData, jobPostId) {
     };
 
     const DOMAIN_URL = "https://fbauto-main-production.up.railway.app";
-    const encodedContext = Buffer.from(JSON.stringify(contextData)).toString("base64url");
-    const contextualMessengerLink = `${DOMAIN_URL}/api/messenger-redirect?context=${encodedContext}`;
+  const encodedContext = encodeURIComponent(Buffer.from(JSON.stringify(contextData)).toString("base64url"));
+  const contextualMessengerLink = `${DOMAIN_URL}/messenger-redirect?context=${encodedContext}`;
 
     return contextualMessengerLink;
   } catch (error) {
@@ -233,8 +233,8 @@ async function generateSelfReplyMessage(jobData, jobPostId) {
     };
 
     const DOMAIN_URL = "https://fbauto-main-production.up.railway.app";
-    const encodedContext = Buffer.from(JSON.stringify(contextData)).toString("base64url");
-    const contextualMessengerLink = `${DOMAIN_URL}/api/messenger-redirect?context=${encodedContext}`;
+  const encodedContext = encodeURIComponent(Buffer.from(JSON.stringify(contextData)).toString("base64url"));
+  const contextualMessengerLink = `${DOMAIN_URL}/messenger-redirect?context=${encodedContext}`;
 
     const messages = [
       `📩 Interested candidates, message me here: ${contextualMessengerLink}`,

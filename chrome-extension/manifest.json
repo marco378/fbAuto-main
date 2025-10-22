@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "FB Job Posting Automation",
+  "version": "1.0.0",
+  "description": "Automatically post jobs to Facebook groups",
+  
+  "permissions": [
+    "tabs",
+    "storage",
+    "alarms",
+    "scripting",
+    "notifications"
+  ],
+  
+  "host_permissions": [
+    "*://*.facebook.com/*"
+  ],
+  
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "assets/icon-16.png",
+      "48": "assets/icon-48.png",
+      "128": "assets/icon-128.png"
+    }
+  },
+  
+  "icons": {
+    "16": "assets/icon-16.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  }
+}

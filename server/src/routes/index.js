@@ -5,6 +5,7 @@ import jobRouter from './job.route.js'
 import candidateRouter from './candidate.route.js'
 import cookieRouter from './cookie.router.js'
 import { automationService } from "../services/automation.services.js";
+import extensionRouter from './extension.js';
 
 
 const router = express.Router()
@@ -14,6 +15,7 @@ router.use("/facebook", facebookRouter)
 router.use("/jobs", jobRouter)
 router.use("/candidates", candidateRouter)
 router.use("/cookies",cookieRouter)
+router.use('/extension', extensionRouter)
 
 router.get("/automation/status", async (req, res) => {
   try {

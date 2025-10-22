@@ -58,6 +58,7 @@ model User{
   //relations
   jobs    Job[]
   credentials   FacebookCredentials?
+  extensionTokens ExtensionToken[]
 
   @@map("users")
 }
@@ -283,4 +284,32 @@ model ConversationStore {
   content   String @db.Text
   
   @@map("conversation_store")
+}
+
+model ExtensionToken {
+  id          String    @id @default(cuid())
+  token       String    @unique // The actual auth token
+  name        String?   // Optional: "My Work Laptop", "Home PC"
+  
+  // Status
+  isActive    Boolean   @default(true)
+  lastUsedAt  DateTime  @default(now())
+  
+  // Metadata
+  deviceInfo  String?   // Browser, OS info
+  ipAddress   String?   // For security tracking
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  expiresAt   DateTime? // Optional: token expiration
+  
+  // Foreign key
+  userId      String
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([token])
+  @@index([userId, isActive])
+  @@map("extension_tokens")
 }

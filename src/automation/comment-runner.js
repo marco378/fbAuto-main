@@ -187,10 +187,10 @@ async function generateReplyMessage(currentJobPost, jobPostId, jobContext) {
     };
 
     const DOMAIN_URL = process.env.DOMAIN_URL || "http://localhost:8000";
-    const encodedContext = Buffer.from(JSON.stringify(contextData)).toString(
-      "base64url"
+    const encodedContext = encodeURIComponent(
+      Buffer.from(JSON.stringify(contextData)).toString("base64url")
     );
-    const contextualMessengerLink = `${DOMAIN_URL}/api/messenger-redirect?context=${encodedContext}`;
+  const contextualMessengerLink = `${DOMAIN_URL}/messenger-redirect?context=${encodedContext}`;
 
     const messages = [
       `Hi! Thanks for your interest in ${jobToUse.title}. Let's chat about the details: ${contextualMessengerLink}`,

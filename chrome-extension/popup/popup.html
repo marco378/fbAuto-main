@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Setup View (First time) -->
+    <div class="view setup-view" id="setupView">
+      <div class="header">
+        <h1>🚀 Setup Extension</h1>
+        <p>Enter your authentication token</p>
+      </div>
+      
+      <div class="form-group">
+        <label>Token:</label>
+        <input type="text" id="tokenInput" placeholder="Paste your token here">
+      </div>
+      
+      <button id="activateBtn" class="btn btn-primary">
+        Activate Extension
+      </button>
+      
+      <div id="setupError" class="error-message" style="display:none;"></div>
+      
+      <div class="help-text">
+        <p>Get your token from the dashboard</p>
+      </div>
+    </div>
+
+    <!-- Active View (After setup) -->
+    <div class="view active-view" id="activeView" style="display:none;">
+      <div class="header">
+        <h1>✅ Extension Active</h1>
+      </div>
+      
+      <div class="status-card">
+        <div class="status-row">
+          <span class="label">Status:</span>
+          <span id="status" class="value status-running">Running</span>
+        </div>
+        
+        <div class="status-row">
+          <span class="label">Last Check:</span>
+          <span id="lastCheck" class="value">Never</span>
+        </div>
+        
+        <div class="status-row">
+          <span class="label">Next Run:</span>
+          <span id="nextRun" class="value">Calculating...</span>
+        </div>
+        
+        <div class="status-row">
+          <span class="label">Total Posts:</span>
+          <span id="totalPosts" class="value badge">0</span>
+        </div>
+      </div>
+      
+      <div class="button-group">
+        <button id="runNowBtn" class="btn btn-primary">
+          ▶️ Run Now
+        </button>
+        <button id="viewLogsBtn" class="btn btn-secondary">
+          📋 View Logs
+        </button>
+      </div>
+      
+      <div class="danger-zone">
+        <button id="deactivateBtn" class="btn btn-danger">
+          🗑️ Deactivate
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading View -->
+    <div class="view loading-view" id="loadingView" style="display:none;">
+      <div class="loader"></div>
+      <p>Working...</p>
+    </div>
+  </div>
+
+  <script src="../utils/config.js"></script>
+  <script src="../utils/helpers.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
