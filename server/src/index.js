@@ -10,7 +10,6 @@ import contextRouter from './routes/job-context.js';
 import { handleMessengerWebhook } from './controllers/messanger-webhook.js';
 
 const app = express()
-
 // Track server state
 let server = null;
 let isShuttingDown = false;
@@ -23,10 +22,12 @@ app.use((req, res, next) => {
 app.use(
   cors({
     origin: [
-      "http://localhost:3000",             // local dev
-   // deployed backend
+      "http://localhost:3000",
+      "chrome-extension://abbadmepmfehoicmbmiapihdcconedan"
     ],
-    credentials: true, // IMPORTANT: allow cookies
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
   })
 );
 app.use(cookieParser())

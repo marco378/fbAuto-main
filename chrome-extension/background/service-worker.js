@@ -110,7 +110,7 @@ async function runPostingCycle() {
 
 // Fetch jobs from API
 async function fetchJobs(token) {
-  const response = await fetch(`${API_URL}/api/extension/jobs`, {
+  const response = await fetch(`${API_URL}/extension/jobs`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   
@@ -168,7 +168,7 @@ async function postJobToGroups(job, token) {
 
 // Create JobPost in DB
 async function createJobPost(jobId, groupUrl, token) {
-  const response = await fetch(`${API_URL}/api/extension/jobpost`, {
+  const response = await fetch(`${API_URL}/extension/jobpost`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -189,7 +189,7 @@ async function createJobPost(jobId, groupUrl, token) {
 
 // Update JobPost in DB
 async function updateJobPost(jobPostId, updates, token) {
-  await fetch(`${API_URL}/api/extension/jobpost/${jobPostId}`, {
+  await fetch(`${API_URL}/extension/jobpost/${jobPostId}`, {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${token}`,

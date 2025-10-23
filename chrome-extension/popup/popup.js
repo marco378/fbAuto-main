@@ -68,25 +68,39 @@ document.getElementById('activateBtn')?.addEventListener('click', async () => {
     // Verify token with backend
     // Use CONFIG.API_URL from ../utils/config.js when available, fall back to dev default
   const API_URL = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : 'http://localhost:5000/api';
-    const response = await fetch(`${API_URL}/api/extension/jobs`, {
+  const response = await fetch(`${API_URL}/extension/jobs`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    
-    if (!response.ok) {
-      throw new Error('Invalid token');
+
+    // Debug: log status and response
+    let debugText = `Status: ${response.status}\n`;
+    let responseBody = '';
+    try {
+      responseBody = await response.text();
+      debugText += `Response: ${responseBody}`;
+    } catch (e) {
+      debugText += 'Response: <failed to parse>';
     }
-    
+
+    if (!response.ok) {
+      errorDiv.textContent = `Invalid token.\n${debugText}`;
+      errorDiv.style.display = 'block';
+      activateBtn.disabled = false;
+      activateBtn.textContent = 'Activate Extension';
+      return;
+    }
+
     // Save token
     await chrome.storage.sync.set({ token });
-    
+
     // Notify background worker
     chrome.runtime.sendMessage({ type: 'TOKEN_ACTIVATED' });
-    
+
     // Show success and switch view
     await showActiveView();
-    
+
   } catch (error) {
-    errorDiv.textContent = 'Invalid token. Please check and try again.';
+    errorDiv.textContent = `Invalid token.\nError: ${error && error.message ? error.message : error}`;
     errorDiv.style.display = 'block';
     activateBtn.disabled = false;
     activateBtn.textContent = 'Activate Extension';

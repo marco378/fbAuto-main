@@ -1,4 +1,6 @@
 // src/automation/job-post-runner-enhanced.js
+console.log('🟢 job-post-runner.js loaded');
+console.log('🟢 [DEBUG] Starting main automation flow...');
 import { chromium } from "playwright";
 import { ensureLoggedIn } from "./facebook-login.js";
 import { humanPause } from "./utils/delays.js";
@@ -90,21 +92,26 @@ async function getJobPostContextForUser(browser, userEmail) {
 async function navigateToGroupSafely(page, groupUrl, maxRetries = 3) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`🔗 Navigation attempt ${attempt}/${maxRetries} to group...`);
+      console.log(`🔗 Navigation attempt ${attempt}/${maxRetries} to group: ${groupUrl}`);
 
       if (page.isClosed()) {
         throw new Error("Page is closed");
       }
 
       await page.goto(groupUrl, {
-        waitUntil: "domcontentloaded",
-        timeout: 30000,
+        waitUntil: "load", // wait for full load
+        timeout: 60000, // increase timeout
       });
 
-      console.log("✅ Navigation successful");
+      console.log("✅ Navigation successful, waiting 10s for manual observation...");
+      await page.waitForTimeout(10000); // manual pause for observation
+
       return true;
     } catch (error) {
       console.error(`❌ Navigation attempt ${attempt} failed: ${error.message}`);
+      if (error.stack) {
+        console.error(error.stack);
+      }
 
       if (attempt < maxRetries) {
         console.log(`⏳ Waiting before retry...`);
@@ -776,12 +783,19 @@ export async function runJobPostAutomation(credentials, jobData = null) {
 
     console.log(`📋 Job: ${jobData.title} at ${jobData.company}`);
 
+
     browser = await initializeJobPostBrowser();
     context = await getJobPostContextForUser(browser, credentials.email || "default");
     page = await context.newPage();
 
-    console.log("🔑 Logging in...");
-    await ensureLoggedIn({ page, context, credentials });
+    console.log("[DEBUG] Before ensureLoggedIn");
+    try {
+      await ensureLoggedIn({ page, context, credentials });
+      console.log("[DEBUG] After ensureLoggedIn");
+    } catch (err) {
+      console.error('[DEBUG] ensureLoggedIn threw:', err.message);
+      throw err;
+    }
 
     const { facebookGroups } = jobData;
 
@@ -851,6 +865,7 @@ export async function runJobPostAutomation(credentials, jobData = null) {
     };
   } catch (error) {
     console.error("❌ Enhanced automation error:", error.message);
+    console.error('[DEBUG] Main automation error stack:', error.stack);
     throw error;
   } finally {
     // Always cleanup browser and context

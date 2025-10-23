@@ -17,7 +17,7 @@ async function apiCall(endpoint, options = {}) {
   
   const API_URL = 'http://localhost:5000/api';
   
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint.replace(/^\/api/, '')}`, {
     ...options,
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -37,12 +37,12 @@ async function apiCall(endpoint, options = {}) {
 const API = {
   // Fetch jobs to post
   fetchJobs: async () => {
-    return apiCall('/api/extension/jobs');
+    return apiCall('/extension/jobs');
   },
   
   // Create JobPost record
   createJobPost: async (jobId, groupUrl) => {
-    return apiCall('/api/extension/jobpost', {
+    return apiCall('/extension/jobpost', {
       method: 'POST',
       body: JSON.stringify({ 
         jobId, 
@@ -53,7 +53,7 @@ const API = {
   
   // Update JobPost record
   updateJobPost: async (jobPostId, updates) => {
-    return apiCall(`/api/extension/jobpost/${jobPostId}`, {
+    return apiCall(`/extension/jobpost/${jobPostId}`, {
       method: 'PUT',
       body: JSON.stringify(updates)
     });
@@ -61,8 +61,8 @@ const API = {
   
   // Verify token
   verifyToken: async (token) => {
-    const API_URL = 'http://localhost:3000'; // UPDATE THIS
-    const response = await fetch(`${API_URL}/api/extension/jobs`, {
+  const API_URL = 'http://localhost:5000/api';
+  const response = await fetch(`${API_URL}/extension/jobs`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     return response.ok;

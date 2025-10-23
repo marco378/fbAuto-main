@@ -1,9 +1,15 @@
 // src/automation/facebook-login.js
+console.log('✅ facebook-login.js loaded');
 import { FB } from "../config/facebook-config.js";
 import { LoginSelectors } from "./utils/selectors.js";
 import { humanPause } from "./utils/delays.js";
 import fs from "fs";
 import path from "path";
+
+// DEBUG: force hasFacebookSession log on module load (remove after debugging)
+// (You can comment this out after confirming logs appear)
+// import { chromium } from 'playwright';
+// (async () => { const browser = await chromium.launch(); const context = await browser.newContext(); await hasFacebookSession(context); await browser.close(); })();
 
 const COOKIES_DIR = path.join(process.cwd(), "cookies");
 const getCookiePath = (email) =>
@@ -48,19 +54,35 @@ const saveCookiesToStorage = async (context, email) => {
 const loadCookiesFromStorage = async (context, email) => {
   try {
     const cookiePath = getCookiePath(email);
-    if (!fs.existsSync(cookiePath)) return false;
+    if (!fs.existsSync(cookiePath)) {
+      console.log(`[DEBUG] No cookie file found at ${cookiePath}`);
+      return false;
+    }
 
     const cookiesData = fs.readFileSync(cookiePath, "utf8");
     const cookies = JSON.parse(cookiesData);
 
-    if (!cookies || cookies.length === 0) return false;
+    if (!cookies || cookies.length === 0) {
+      console.log('[DEBUG] Cookie file is empty or invalid');
+      return false;
+    }
 
     const now = Date.now() / 1000;
     const validCookies = cookies.filter(
       (cookie) => !cookie.expires || cookie.expires > now
     );
 
-    if (validCookies.length === 0) return false;
+    console.log(`[DEBUG] Loaded ${cookies.length} cookies from file, ${validCookies.length} are valid (not expired)`);
+    validCookies.forEach(c => {
+      if (c.expires) {
+        console.log(`[DEBUG] Cookie ${c.name} expires at ${new Date(c.expires * 1000).toISOString()} (now: ${new Date(now * 1000).toISOString()})`);
+      }
+    });
+
+    if (validCookies.length === 0) {
+      console.log('[DEBUG] No valid cookies after expiration check');
+      return false;
+    }
 
     const normalized = normalizeCookies(validCookies);
     await context.addCookies(normalized);
@@ -88,8 +110,16 @@ const hasFacebookSession = async (context) => {
       (c) => c.name === "xs" && c.value
     );
 
+  console.log('🔍 Facebook cookies in context:', facebookCookies.map(c => ({ name: c.name, value: c.value, domain: c.domain, expires: c.expires })));
+  console.log('🔍 hasUserCookie:', hasUserCookie, 'hasSessionCookie:', hasSessionCookie);
+
+    if (!(hasUserCookie && hasSessionCookie)) {
+      console.error('❌ Not logged in: missing c_user or xs cookie');
+    }
+
     return hasUserCookie && hasSessionCookie;
-  } catch {
+  } catch (err) {
+    console.error('❌ Error in hasFacebookSession:', err.message);
     return false;
   }
 };
@@ -121,10 +151,13 @@ export const ensureLoggedIn = async ({ page, context }) => {
     await page.goto(FB.base, { waitUntil: "load", timeout: 30000 });
     await page.waitForTimeout(2000);
 
-    if (await hasFacebookSession(context)) {
+    const sessionOk = await hasFacebookSession(context);
+    if (sessionOk) {
       console.log("✅ Already logged in via cookies!");
       await saveCookiesToStorage(context, email); // refresh
       return true;
+    } else {
+      console.error('❌ Login check failed after loading cookies.');
     }
 
     console.warn(
@@ -137,10 +170,13 @@ export const ensureLoggedIn = async ({ page, context }) => {
   console.log("🔐 Proceeding with fresh login...");
   await page.goto(FB.base, { waitUntil: "load", timeout: 30000 });
 
-  if (await hasFacebookSession(context)) {
+  const sessionOk2 = await hasFacebookSession(context);
+  if (sessionOk2) {
     console.log("✅ Session already active, no login form needed");
     await saveCookiesToStorage(context, email);
     return true;
+  } else {
+    console.error('❌ Login check failed after fresh login page load.');
   }
 
   // Fill login form
@@ -176,7 +212,9 @@ export const ensureLoggedIn = async ({ page, context }) => {
   await page.goto(FB.base, { waitUntil: "load", timeout: 30000 });
   await page.waitForTimeout(2000);
 
-  if (!(await hasFacebookSession(context))) {
+  const sessionOk3 = await hasFacebookSession(context);
+  if (!sessionOk3) {
+    console.error('❌ Login check failed after all login attempts.');
     throw new Error("❌ Login failed - no valid session found");
   }
 
