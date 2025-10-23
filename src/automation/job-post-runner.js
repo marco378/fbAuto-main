@@ -400,13 +400,20 @@ async function createGroupPost(page, jobContent) {
       await humanPause(1000, 2000);
     }
 
-    // Clear and type content
+    // Clear and type content using simulated real user typing for Lexical Editor
     await page.keyboard.press("Control+a");
     await page.keyboard.press("Delete");
     await humanPause(500, 1000);
 
-    console.log("⌨️ Typing message with keyboard...");
-    await page.keyboard.type(jobContent, { delay: 100 });
+    console.log("⌨️ Typing message with simulated user input for Lexical Editor...");
+    await textInput.focus();
+    for (const char of jobContent) {
+      await textInput.type(char, { delay: 40 + Math.floor(Math.random() * 60) });
+      // Optionally, dispatch input event for each char
+      await textInput.evaluate((el) => {
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    }
     await humanPause(2000, 3000);
 
     // Verify content was typed
@@ -869,15 +876,33 @@ export async function runJobPostAutomation(credentials, jobData = null) {
     throw error;
   } finally {
     // Always cleanup browser and context
+    console.log('[DEBUG] Entering finally block for cleanup');
     if (page) {
+      console.log('[DEBUG] Page exists, preparing to wait before closing');
+      // Increase tab closing time for observation
+      console.log('⏳ Waiting 30 seconds before closing the tab for manual observation...');
+      await new Promise(res => setTimeout(res, 30000));
+      console.log('[DEBUG] Closing page now...');
       await page.close().catch(err => console.error('Error closing page:', err));
+      console.log('[DEBUG] Page closed');
+    } else {
+      console.log('[DEBUG] No page to close');
     }
     if (context) {
+      console.log('[DEBUG] Closing context...');
       await context.close().catch(err => console.error('Error closing context:', err));
+      console.log('[DEBUG] Context closed');
+    } else {
+      console.log('[DEBUG] No context to close');
     }
     if (browser) {
+      console.log('[DEBUG] Closing browser...');
       await browser.close().catch(err => console.error('Error closing browser:', err));
+      console.log('[DEBUG] Browser closed');
+    } else {
+      console.log('[DEBUG] No browser to close');
     }
+    console.log('[DEBUG] Cleanup finished');
   }
 }
 
