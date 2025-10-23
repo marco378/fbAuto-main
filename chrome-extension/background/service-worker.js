@@ -5,8 +5,8 @@ importScripts(
   '../utils/messenger-link.js'
 );
 
-const API_URL = 'http://localhost:3000'; // UPDATE THIS
-const FRONTEND_URL = 'http://localhost:5173'; // UPDATE THIS
+const API_URL = 'http://localhost:5000/api';
+const FRONTEND_URL = 'http://localhost:3000';
 
 // Initialize on install
 chrome.runtime.onInstalled.addListener(() => {

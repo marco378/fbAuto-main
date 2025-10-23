@@ -1,7 +1,7 @@
 // Configuration - UPDATE THESE WITH YOUR ACTUAL URLS
 const CONFIG = {
-  API_URL: 'http://localhost:3000',  // CHANGE TO YOUR BACKEND URL
-  FRONTEND_URL: 'http://localhost:5173',  // CHANGE TO YOUR FRONTEND URL
+  API_URL: 'http://localhost:5000/api',  // ← Your backend
+  FRONTEND_URL: 'http://localhost:3000',  // ← Your Next.js frontend
   
   // Posting intervals
   CHECK_INTERVAL_MINUTES: 360,  // 6 hours

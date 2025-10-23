@@ -15,7 +15,7 @@ async function apiCall(endpoint, options = {}) {
     throw new Error('No authentication token found');
   }
   
-  const API_URL = 'http://localhost:3000'; // UPDATE THIS
+  const API_URL = 'http://localhost:5000/api';
   
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,

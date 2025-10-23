@@ -1,7 +1,7 @@
 // Generate messenger link (copied from your backend logic)
 
 function generateMessengerLink(job, jobPostId) {
-  const FRONTEND_URL = 'http://localhost:5173'; // UPDATE THIS
+  const FRONTEND_URL = 'http://localhost:3000';
   
   const context = {
     jobPostId,
