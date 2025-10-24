@@ -23,7 +23,8 @@ app.use(
   cors({
     origin: [
       "https://fbauto-main-production-5d2d.up.railway.app",
-      "chrome-extension://edmhmdcmgagbdifmdppfgjmoibkgnoin" // <-- your extension ID
+      "chrome-extension://edmhmdcmgagbdifmdppfgjmoibkgnoin", // <-- your extension ID
+      "https://fb-auto-frontend.vercel.app/" // <-- new frontend domain
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
