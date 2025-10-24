@@ -23,7 +23,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "chrome-extension://abbadmepmfehoicmbmiapihdcconedan"
+      "chrome-extension://edmhmdcmgagbdifmdppfgjmoibkgnoin" // <-- your extension ID
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
