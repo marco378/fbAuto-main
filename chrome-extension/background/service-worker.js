@@ -7,8 +7,8 @@ importScripts(
   '../utils/messenger-link.js'
 );
 
-const API_URL = 'http://localhost:5000/api';
-const FRONTEND_URL = 'http://localhost:3000';
+const API_URL = 'https://fbauto-main-production-5d2d.up.railway.app/api';
+const FRONTEND_URL = 'https://fbauto-main-production-5d2d.up.railway.app';
 
 // CRITICAL: Global flag to prevent overlapping posting cycles
 let isPostingInProgress = false;

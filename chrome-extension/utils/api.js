@@ -15,7 +15,7 @@ async function apiCall(endpoint, options = {}) {
     throw new Error('No authentication token found');
   }
   
-  const API_URL = 'http://localhost:5000/api';
+  const API_URL = 'https://fbauto-main-production-5d2d.up.railway.app/api';
   
   const response = await fetch(`${API_URL}${endpoint.replace(/^\/api/, '')}`, {
     ...options,
@@ -61,7 +61,7 @@ const API = {
   
   // Verify token
   verifyToken: async (token) => {
-  const API_URL = 'http://localhost:5000/api';
+  const API_URL = 'https://fbauto-main-production-5d2d.up.railway.app/api';
   const response = await fetch(`${API_URL}/extension/jobs`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });

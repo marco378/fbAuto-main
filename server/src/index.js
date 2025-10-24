@@ -22,7 +22,7 @@ app.use((req, res, next) => {
 app.use(
   cors({
     origin: [
-      "http://localhost:3000",
+      "https://fbauto-main-production-5d2d.up.railway.app",
       "chrome-extension://edmhmdcmgagbdifmdppfgjmoibkgnoin" // <-- your extension ID
     ],
     credentials: true,

@@ -67,7 +67,7 @@ document.getElementById('activateBtn')?.addEventListener('click', async () => {
   try {
     // Verify token with backend
     // Use CONFIG.API_URL from ../utils/config.js when available, fall back to dev default
-  const API_URL = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : 'http://localhost:5000/api';
+  const API_URL = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : 'https://fbauto-main-production-5d2d.up.railway.app/api';
   const response = await fetch(`${API_URL}/extension/jobs`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });

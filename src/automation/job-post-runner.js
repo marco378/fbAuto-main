@@ -157,7 +157,7 @@ async function generateMessengerLink(jobData, jobPostId) {
       timestamp: Date.now(),
     };
 
-    const DOMAIN_URL = "https://fbauto-main-production.up.railway.app";
+  const DOMAIN_URL = "https://fbauto-main-production-5d2d.up.railway.app";
   const encodedContext = encodeURIComponent(Buffer.from(JSON.stringify(contextData)).toString("base64url"));
   const contextualMessengerLink = `${DOMAIN_URL}/messenger-redirect?context=${encodedContext}`;
 
@@ -239,7 +239,7 @@ async function generateSelfReplyMessage(jobData, jobPostId) {
       timestamp: Date.now(),
     };
 
-    const DOMAIN_URL = "https://fbauto-main-production.up.railway.app";
+  const DOMAIN_URL = "https://fbauto-main-production-5d2d.up.railway.app";
   const encodedContext = encodeURIComponent(Buffer.from(JSON.stringify(contextData)).toString("base64url"));
   const contextualMessengerLink = `${DOMAIN_URL}/messenger-redirect?context=${encodedContext}`;
 
