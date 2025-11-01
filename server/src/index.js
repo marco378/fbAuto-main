@@ -24,7 +24,7 @@ app.use(
     origin: [
       "https://fb-auto-frontend.vercel.app",
       "https://fbauto-main-production-5d2d.up.railway.app",
-      "chrome-extension://edmhmdcmgagbdifmdppfgjmoibkgnoin", // <-- your extension ID
+      "chrome-extension://dnmdpnpoigoheodnbdigodkmlhnehiik", // <-- your extension ID
   "https://fb-auto-frontend-gm60scb53-audaces-projects-907ed43e.vercel.app" // <-- new vercel deployment domain
     ],
     credentials: true,
