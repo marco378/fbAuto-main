@@ -9,12 +9,35 @@ import contextRouter from './routes/job-context.js';
 import { handleMessengerWebhook } from './controllers/messanger-webhook.js';
 import { prisma } from './lib/prisma.js';
 
-// ...existing code...
+const app = express();
+let server;
+let isShuttingDown = false;
 
 app.use((req, res, next) => {
   console.log(`Request Method: ${req.method}, Request URL: ${req.url}`);
   next();
 });
+
+app.use(
+  cors({
+    origin: [
+      "https://fb-auto-frontend.vercel.app",
+      "https://fbauto-main-production-5d2d.up.railway.app",
+      "chrome-extension://dnmdpnpoigoheodnbdigodkmlhnehiik",
+      "https://fb-auto-frontend-gm60scb53-audaces-projects-907ed43e.vercel.app"
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  })
+);
+
+app.use(cookieParser())
+app.use(express.json())
+
+app.get("/health", (req, res) => {
+  res.send(Date.now())
+})
 
 // Context session API endpoints
 // GET /api/context-session/:sessionId
@@ -75,43 +98,6 @@ app.get('/api/context-session/by-user/:facebookUserId', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-// src/server.js (optimized version with better process management)
-import express from 'express'
-import cors from 'cors'
-import cookieParser from 'cookie-parser'
-import { PORT } from './credentials.js';
-import router from './routes/index.js';
-import { automationService } from './services/automation.services.js';
-import { messengerRedirectWithContext } from './routes/messanger-redirect.js';
-import contextRouter from './routes/job-context.js';
-import { handleMessengerWebhook } from './controllers/messanger-webhook.js';
-
-// ...existing code...
-
-app.use((req, res, next) => {
-  console.log(`Request Method: ${req.method}, Request URL: ${req.url}`);
-  next();
-});
-
-app.use(
-  cors({
-    origin: [
-      "https://fb-auto-frontend.vercel.app",
-      "https://fbauto-main-production-5d2d.up.railway.app",
-      "chrome-extension://dnmdpnpoigoheodnbdigodkmlhnehiik", // <-- your extension ID
-  "https://fb-auto-frontend-gm60scb53-audaces-projects-907ed43e.vercel.app" // <-- new vercel deployment domain
-    ],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-  })
-);
-app.use(cookieParser())
-app.use(express.json())
-
-app.get("/health", (req, res) => {
-  res.send(Date.now())
-})
 
 // Enhanced automation status endpoint with system stats
 app.get("/api/automation/status", async (req, res) => {
@@ -205,13 +191,13 @@ async function startServer() {
     await automationService.initialize();
     
     // Start the server
-      server = app.listen(PORT, "0.0.0.0", () => {
-        console.log(`Server running on port ${PORT}`);
-        console.log(`Health check: http://localhost:${PORT}/health`);
-        console.log(`Automation status: http://localhost:${PORT}/api/automation/status`);
-        console.log('Job posting with immediate engagement runs every 2 hours');
-        console.log('Manual comment monitoring available via API when needed');
-        console.log('Resource usage optimized - ~60% reduction in browser instances');
+    server = app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on port ${PORT}`);
+      console.log(`Health check: http://localhost:${PORT}/health`);
+      console.log(`Automation status: http://localhost:${PORT}/api/automation/status`);
+      console.log('Job posting with immediate engagement runs every 2 hours');
+      console.log('Manual comment monitoring available via API when needed');
+      console.log('Resource usage optimized - ~60% reduction in browser instances');
     });
     
     // Handle server errors
