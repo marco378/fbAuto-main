@@ -1,5 +1,5 @@
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://audace.app.n8n.cloud/webhook/webhook-test';
-const VERIFY_TOKEN = process.env.FACEBOOK_VERIFY_TOKEN || 'EAAUNrA8WQrUBPc75RtQwhCQiZAgmG8yHhmJdT6CVluVcS7JK2BVnntUFtyAq9DUYMx2ScZCl4FVYr2PxbVfZAvM4TZBlJPo49YNmrPKI9SVjSCFk28Wsdzp0ZCry5BPuOxuV4EPYOuZCrvmz9V99NkqbEXhPWZBDhGDbfMVPGAUNuHkWMgbP7d52gxj1RVEZCcyBMxjX2gZDZD'
+const VERIFY_TOKEN = process.env.FACEBOOK_VERIFY_TOKEN || 'EAAUNrA8WQrUBPz29u8U86C7HkZCRZCKZAw1LjPDkKMZBu9ariwIWFS1ozdhdY4UnD0Lv2GCjTcaHVwZCM3fGXvC0yZCIgr96zfaBxNJk3rZAB4pCAFjmbgotmrMK14ezXFz0jjadfeCQuZBSafDNfD7tA5LQ5Hj3dCsRmHDQtXiinL7fh1rk4hTl5eLf3EjS3RKt1bSfZAgZDZD'
 
 export const handleMessengerWebhook = async (req, res) => {
   console.log('📥 Received webhook:', JSON.stringify(req.body, null, 2));
@@ -53,24 +53,88 @@ async function handleReferral(referral, senderId) {
       return;
     }
 
-    const refData = JSON.parse(Buffer.from(referral.ref, 'base64url').toString());
-    console.log('🔍 Decoded ref data:', refData);
+    // NEW: ref is now a plain session ID string, not base64 JSON
+    const sessionId = referral.ref;
+    console.log('🔍 Session ID from referral:', sessionId);
+
+    // Fetch job context from database using session ID
+    const contextSession = await fetchContextFromDatabase(sessionId);
+
+    if (!contextSession) {
+      console.log('❌ No active context found for session:', sessionId);
+      // Send webhook anyway but with no job context
+      const payload = {
+        type: 'messenger_referral',
+        timestamp: new Date().toISOString(),
+        senderId,
+        sessionId,
+        error: 'Context not found or expired',
+        source: 'facebook_messenger'
+      };
+      await sendToN8N(payload);
+      return;
+    }
+
+    // Link this Facebook user to the context session
+    await updateContextSession(sessionId, senderId);
 
     const payload = {
       type: 'messenger_referral',
       timestamp: new Date().toISOString(),
       senderId,
-      jobContext: refData,
-      rawReferral: referral,
+      sessionId,
+      jobContext: contextSession.contextData, // Full job context from database
+      contextSessionId: contextSession.id,
       source: 'facebook_messenger'
     };
 
-    console.log('📤 Sending payload to N8N:', payload);
+    console.log('📤 Sending payload to N8N with retrieved context');
     await sendToN8N(payload);
 
   } catch (error) {
     console.error('❌ Error handling referral:', error);
   }
+}
+
+// NEW: Add these helper functions
+async function fetchContextFromDatabase(sessionId) {
+  try {
+    const response = await fetch(`${process.env.API_URL || 'https://fbauto-main-production-5d2d.up.railway.app/api'}/context-session/${sessionId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      console.log('Context session not found or expired');
+      return null;
+    }
+
+    const data = await response.json();
+    return data.contextSession;
+  } catch (error) {
+    console.error('Error fetching context from database:', error);
+    return null;
+  }
+}
+
+async function updateContextSession(sessionId, facebookUserId) {
+  try {
+    await fetch(`${process.env.API_URL || 'https://fbauto-main-production-5d2d.up.railway.app/api'}/context-session/${sessionId}/link`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ 
+        facebookUserId,
+        conversationStarted: true 
+      })
+    });
+  } catch (error) {
+    console.error('Error updating context session:', error);
+  }
+// ...existing code...
 }
 
 async function sendToN8N(payload) {
@@ -99,21 +163,41 @@ async function handleMessage(event, senderId) {
   console.log('💬 Message received from:', senderId);
   console.log('📝 Text:', event.message.text);
   
-  // Check if this is the FIRST message and has referral data
   let jobContext = null;
+  let sessionId = null;
+
+  // Check if this message has referral data (first message scenario)
   if (event.message.referral && event.message.referral.ref) {
     console.log('🎯 First message with referral data!');
+    sessionId = event.message.referral.ref; // Now it's a plain session ID
+    
+    // Fetch context from database
+    const contextSession = await fetchContextFromDatabase(sessionId);
+
+    if (contextSession) {
+      jobContext = contextSession.contextData;
+      console.log('✅ Job context retrieved from database:', jobContext.jobTitle);
+      
+      // Update with Facebook user ID if not already set
+      await updateContextSession(sessionId, senderId);
+    }
+  } else {
+    // For subsequent messages, try to find context by Facebook user ID
     try {
-      const decodedRef = JSON.parse(Buffer.from(event.message.referral.ref, 'base64url').toString());
-      jobContext = {
-        jobPostId: decodedRef.jid,
-        jobTitle: decodedRef.jt,
-        company: decodedRef.c,
-        timestamp: decodedRef.ts
-      };
-      console.log('✅ Job context from message:', jobContext);
+      const response = await fetch(`${process.env.API_URL || 'https://fbauto-main-production-5d2d.up.railway.app/api'}/context-session/by-user/${senderId}`, {
+        method: 'GET'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.contextSession) {
+          jobContext = data.contextSession.contextData;
+          sessionId = data.contextSession.sessionToken;
+          console.log('✅ Retrieved existing context for user:', jobContext.jobTitle);
+        }
+      }
     } catch (error) {
-      console.error('❌ Failed to decode message referral:', error);
+      console.error('❌ Failed to retrieve context by user ID:', error);
     }
   }
   
@@ -121,16 +205,17 @@ async function handleMessage(event, senderId) {
     type: 'messenger_message',
     timestamp: new Date().toISOString(),
     senderId: senderId,
+    sessionId: sessionId,
     message: {
       text: event.message.text || '',
       attachments: event.message.attachments || []
     },
-    jobContext: jobContext, // Include job context if available
+    jobContext: jobContext, // Will be null if no context found
     source: 'facebook_messenger_message'
   };
   
   await sendToN8N(webhookPayload);
-  console.log('📤 Message data sent to N8N');
+  console.log('📤 Message data sent to N8N with context');
 }
 
 // Handle button clicks (postbacks)

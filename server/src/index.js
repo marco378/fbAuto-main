@@ -1,3 +1,64 @@
+// Context session API endpoints
+import { prisma } from './lib/prisma.js';
+
+// GET /api/context-session/:sessionId
+app.get('/api/context-session/:sessionId', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const contextSession = await prisma.jobContextSession.findUnique({
+      where: { sessionToken: sessionId },
+    });
+    if (!contextSession || !contextSession.isActive || new Date(contextSession.expiresAt) < new Date()) {
+      return res.status(404).json({ error: 'Context not found or expired' });
+    }
+    res.json({ contextSession });
+  } catch (error) {
+    console.error('Error fetching context session:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PUT /api/context-session/:sessionId/link
+app.put('/api/context-session/:sessionId/link', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { facebookUserId, conversationStarted } = req.body;
+    const updated = await prisma.jobContextSession.update({
+      where: { sessionToken: sessionId },
+      data: {
+        facebookUserId,
+        conversationStarted,
+        lastAccessedAt: new Date()
+      }
+    });
+    res.json({ success: true, contextSession: updated });
+  } catch (error) {
+    console.error('Error updating context session:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/context-session/by-user/:facebookUserId
+app.get('/api/context-session/by-user/:facebookUserId', async (req, res) => {
+  try {
+    const { facebookUserId } = req.params;
+    const contextSession = await prisma.jobContextSession.findFirst({
+      where: {
+        facebookUserId,
+        isActive: true,
+        expiresAt: { gt: new Date() }
+      },
+      orderBy: { lastAccessedAt: 'desc' }
+    });
+    if (!contextSession) {
+      return res.status(404).json({ error: 'No active context found' });
+    }
+    res.json({ contextSession });
+  } catch (error) {
+    console.error('Error fetching context by user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 // src/server.js (optimized version with better process management)
 import express from 'express'
 import cors from 'cors'
