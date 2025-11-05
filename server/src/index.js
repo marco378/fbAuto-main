@@ -1,6 +1,22 @@
-// Context session API endpoints
+import express from 'express'
+import cors from 'cors'
+import cookieParser from 'cookie-parser'
+import { PORT } from './credentials.js';
+import router from './routes/index.js';
+import { automationService } from './services/automation.services.js';
+import { messengerRedirectWithContext } from './routes/messanger-redirect.js';
+import contextRouter from './routes/job-context.js';
+import { handleMessengerWebhook } from './controllers/messanger-webhook.js';
 import { prisma } from './lib/prisma.js';
 
+// ...existing code...
+
+app.use((req, res, next) => {
+  console.log(`Request Method: ${req.method}, Request URL: ${req.url}`);
+  next();
+});
+
+// Context session API endpoints
 // GET /api/context-session/:sessionId
 app.get('/api/context-session/:sessionId', async (req, res) => {
   try {
@@ -70,10 +86,7 @@ import { messengerRedirectWithContext } from './routes/messanger-redirect.js';
 import contextRouter from './routes/job-context.js';
 import { handleMessengerWebhook } from './controllers/messanger-webhook.js';
 
-const app = express()
-// Track server state
-let server = null;
-let isShuttingDown = false;
+// ...existing code...
 
 app.use((req, res, next) => {
   console.log(`Request Method: ${req.method}, Request URL: ${req.url}`);
