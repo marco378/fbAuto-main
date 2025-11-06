@@ -184,22 +184,22 @@ model Candidate{
   phone           String?
   experience      String?
   skills          String[]
-  
+
   // Enhanced resume handling
   resumeUrl       String?
   resumeFileName  String?
   resumeUploadedAt DateTime?
-  
+
   eligibility     CandidateEligibility @default(PENDING)
   notes           String?
-  
+
   // Enhanced conversation tracking
   messengerConversation Json?          // Store full conversation history
   conversationSummary   String?        // AI-generated summary
   screeningScore        Int?           // 0-100 score
   keyStrengths         String[]        // Identified strengths
   concerns             String[]        // Red flags or concerns
-  
+
   // Interview scheduling
   availableForInterview Boolean @default(false)
   preferredInterviewTime String?
