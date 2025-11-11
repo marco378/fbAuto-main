@@ -47,28 +47,51 @@ export const messengerRedirectWithContext = async (req, res) => {
   try {
     const { context } = req.query;
     console.log('🔗 Messenger redirect triggered');
+    console.log('📦 Full query params:', JSON.stringify(req.query));
     console.log('📦 Raw context param:', context);
+    console.log('📦 Context length:', context ? context.length : 0);
+    console.log('📦 Full URL:', req.url);
     
     // If no context provided, show job closed page
     if (!context) {
-      console.log('❌ No context provided');
+      console.log('❌ No context provided in query params');
+      console.log('❌ Available params:', Object.keys(req.query));
       return res.status(400).send(getJobClosedHTML());
     }
     
-    // Decode context - NOW ONLY EXPECTING jobPostId
+    // Decode context - HANDLE BOTH OLD AND NEW FORMATS
     let jobPostId;
+    let decodedContext = null;
+    
     try {
-      // Try parsing as JSON first (new format: {"jobPostId":"xxx"})
       const decoded = Buffer.from(context, 'base64url').toString();
       console.log('🔓 Decoded string:', decoded);
+      console.log('🔓 Decoded length:', decoded.length);
       
+      // Parse the JSON
       const parsed = JSON.parse(decoded);
-      jobPostId = parsed.jobPostId;
+      console.log('✅ Parsed object keys:', Object.keys(parsed));
       
-      console.log('✅ Parsed jobPostId:', jobPostId);
+      // Handle both formats:
+      // New format: {"jobPostId":"xxx"}
+      // Old format: {"jobPostId":"xxx", "jobTitle":"...", "company":"...", ...}
+      jobPostId = parsed.jobPostId;
+      decodedContext = parsed; // Keep the full context in case it has everything
+      
+      console.log('✅ Extracted jobPostId:', jobPostId);
     } catch (e) {
       console.log('❌ Failed to decode context:', e.message);
+      console.log('❌ Context value:', context);
       console.log('❌ Context length:', context.length);
+      
+      // Try to decode just to see what we got
+      try {
+        const rawDecoded = Buffer.from(context, 'base64url').toString();
+        console.log('❌ Raw decoded (even if invalid JSON):', rawDecoded);
+      } catch (decodeErr) {
+        console.log('❌ Could not even decode base64:', decodeErr.message);
+      }
+      
       return res.status(400).send(getJobClosedHTML());
     }
     
@@ -122,6 +145,7 @@ export const messengerRedirectWithContext = async (req, res) => {
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     // Build FULL context data from database
+    // If the context already had full data (old format), use that as fallback
     const fullContextData = {
       jobPostId: jobPost.id,
       jobId: jobPost.job.id,
@@ -136,7 +160,9 @@ export const messengerRedirectWithContext = async (req, res) => {
       responsibilities: jobPost.job.responsibities, // Note: typo in your schema
       perks: jobPost.job.perks,
       facebookGroupUrl: jobPost.facebookGroupUrl,
-      postUrl: jobPost.postUrl
+      postUrl: jobPost.postUrl,
+      // Include any extra fields from old context format
+      ...(decodedContext || {})
     };
     
     // Store context in database with FULL data
