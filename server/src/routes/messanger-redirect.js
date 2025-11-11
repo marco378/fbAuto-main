@@ -41,12 +41,13 @@ const getJobClosedHTML = () => `
 `;
 
 // ============================================
-// MAIN REDIRECT HANDLER - FIXED VERSION
+// MAIN REDIRECT HANDLER - MINIMAL CONTEXT VERSION
 // ============================================
 export const messengerRedirectWithContext = async (req, res) => {
   try {
     const { context } = req.query;
-    console.log('🔗 Messenger redirect triggered with context');
+    console.log('🔗 Messenger redirect triggered');
+    console.log('📦 Raw context param:', context);
     
     // If no context provided, show job closed page
     if (!context) {
@@ -54,17 +55,22 @@ export const messengerRedirectWithContext = async (req, res) => {
       return res.status(400).send(getJobClosedHTML());
     }
     
-    // Decode and validate context
-    let decodedContext;
+    // Decode context - NOW ONLY EXPECTING jobPostId
+    let jobPostId;
     try {
-      decodedContext = JSON.parse(Buffer.from(context, 'base64url').toString());
-      console.log('📋 Decoded job context:', decodedContext.jobTitle, 'at', decodedContext.company);
+      // Try parsing as JSON first (new format: {"jobPostId":"xxx"})
+      const decoded = Buffer.from(context, 'base64url').toString();
+      console.log('🔓 Decoded string:', decoded);
+      
+      const parsed = JSON.parse(decoded);
+      jobPostId = parsed.jobPostId;
+      
+      console.log('✅ Parsed jobPostId:', jobPostId);
     } catch (e) {
       console.log('❌ Failed to decode context:', e.message);
+      console.log('❌ Context length:', context.length);
       return res.status(400).send(getJobClosedHTML());
     }
-    
-    const { jobPostId } = decodedContext;
     
     // Validate jobPostId exists
     if (!jobPostId) {
@@ -72,22 +78,14 @@ export const messengerRedirectWithContext = async (req, res) => {
       return res.status(400).send(getJobClosedHTML());
     }
     
-    // Look up the job post and parent job
+    // Look up the job post and parent job WITH ALL DATA
     console.log('🔎 Looking up jobPostId:', jobPostId);
     const jobPost = await prisma.jobPost.findFirst({
       where: {
         id: jobPostId
       },
       include: {
-        job: {
-          select: {
-            id: true,
-            title: true,
-            company: true,
-            isActive: true,
-            expiresAt: true
-          }
-        }
+        job: true // Get ALL job fields
       }
     });
     
@@ -123,28 +121,47 @@ export const messengerRedirectWithContext = async (req, res) => {
     // Create unique session ID
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
-    // Store context in database
+    // Build FULL context data from database
+    const fullContextData = {
+      jobPostId: jobPost.id,
+      jobId: jobPost.job.id,
+      jobTitle: jobPost.job.title,
+      company: jobPost.job.company,
+      location: jobPost.job.location,
+      jobType: jobPost.job.jobType,
+      experience: jobPost.job.experiance, // Note: typo in your schema
+      salaryRange: jobPost.job.salaryRange,
+      description: jobPost.job.description,
+      requirements: jobPost.job.requirements,
+      responsibilities: jobPost.job.responsibities, // Note: typo in your schema
+      perks: jobPost.job.perks,
+      facebookGroupUrl: jobPost.facebookGroupUrl,
+      postUrl: jobPost.postUrl
+    };
+    
+    // Store context in database with FULL data
     const contextSession = await prisma.jobContextSession.create({
       data: {
         sessionToken: sessionId,
-        jobPostId: decodedContext.jobPostId,
-        contextData: decodedContext,
+        jobPostId: jobPostId,
+        contextData: fullContextData,
         isActive: true,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
         lastAccessedAt: new Date()
       }
     });
     
-    console.log(`✅ Stored context with session ID: ${sessionId}`);
+    console.log(`✅ Stored full context with session ID: ${sessionId}`);
     
-    // Send webhook payload to N8N
+    // Send webhook payload to N8N with FULL context
     const webhookPayload = {
       type: 'messenger_context_trigger',
       timestamp: new Date().toISOString(),
       sessionId: sessionId,
       contextSessionId: contextSession.id,
-      jobTitle: decodedContext.jobTitle,
-      company: decodedContext.company,
+      jobContext: fullContextData,  // ✅ Send FULL context like before
+      jobTitle: jobPost.job.title,  // Keep for backward compatibility
+      company: jobPost.job.company, // Keep for backward compatibility
       messengerInfo: {
         pageId: MESSENGER_LINK.split('/').pop(),
         redirectUrl: `${MESSENGER_LINK}?ref=${sessionId}`
